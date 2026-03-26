@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduPortal MVP — AI Student Success Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── TOKENS ─────────────────────────────────────────── */
+    :root {
+      --bg:        #0a0c10;
+      --surface:   #111419;
+      --border:    #1e2330;
+      --accent:    #00e5a0;
+      --accent2:   #6c63ff;
+      --warn:      #ff6b6b;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --radius:    10px;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    /* ─── RESET ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    button { cursor: pointer; font-family: var(--font-mono); }
+    input, select, textarea {
+      font-family: var(--font-mono);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      width: 100%;
+      font-size: 13px;
+      outline: none;
+      transition: border .2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+
+    /* ─── LAYOUT ─────────────────────────────────────────── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,12,16,.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+    .logo {
+      font-family: var(--font-head);
+      font-weight: 800; font-size: 20px;
+      letter-spacing: -.02em;
+    }
+    .logo span { color: var(--accent); }
+
+    nav { display: flex; gap: 4px; }
+    nav button {
+      background: none; border: none; color: var(--muted);
+      font-size: 13px; padding: 8px 14px; border-radius: 8px;
+      transition: color .2s, background .2s;
+      font-family: var(--font-mono);
+    }
+    nav button.active, nav button:hover {
+      color: var(--text); background: var(--surface);
+    }
+    nav button.active { color: var(--accent); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    section { display: none; animation: fadeIn .3s ease; }
+    section.active { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: none; } }
+
+    footer {
+      text-align: center;
+      border-top: 1px solid var(--border);
+      padding: 28px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* ─── HERO ───────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,229,160,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-family: var(--font-head);
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .hero h1 em { color: var(--accent); font-style: normal; }
+    .hero p { color: var(--muted); max-width: 520px; margin: 0 auto 32px; font-size: 15px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent); color: #000;
+      border: none; border-radius: 8px;
+      padding: 12px 24px; font-size: 13px; font-weight: 600;
+      font-family: var(--font-mono);
+      transition: opacity .2s, transform .15s;
+    }
+    .btn:hover { opacity: .88; transform: translateY(-1px); }
+    .btn.ghost {
+      background: none; border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn.sm { padding: 8px 16px; font-size: 12px; }
+    .btn.danger { background: var(--warn); }
+
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; margin-top: 40px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      text-align: left;
+    }
+    .stat-card .num {
+      font-family: var(--font-head);
+      font-size: 2rem; font-weight: 800;
+      color: var(--accent);
+    }
+    .stat-card .lbl { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+    /* ─── CARDS / PANELS ─────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-family: var(--font-head);
+      font-size: 1.1rem; font-weight: 700;
+      margin-bottom: 18px;
+    }
+    .card h2 .tag {
+      display: inline-block;
+      background: rgba(0,229,160,.12);
+      color: var(--accent);
+      font-size: 10px; padding: 2px 8px; border-radius: 20px;
+      margin-left: 8px; vertical-align: middle;
+      font-family: var(--font-mono); font-weight: 500;
+    }
+
+    .section-title {
+      font-family: var(--font-head);
+      font-size: 1.5rem; font-weight: 800;
+      margin-bottom: 24px;
+      letter-spacing: -.02em;
+    }
+    .section-title span { color: var(--accent); }
+
+    /* ─── TABLES ─────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    table[cellpadding] { /* honored inline */ }
+    th {
+      background: rgba(0,229,160,.07);
+      color: var(--accent);
+      text-align: left;
+      padding: 12px 14px;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,.02); }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge.green { background: rgba(0,229,160,.15); color: var(--accent); }
+    .badge.purple { background: rgba(108,99,255,.2); color: #a99eff; }
+    .badge.red { background: rgba(255,107,107,.15); color: var(--warn); }
+    .badge.yellow { background: rgba(255,213,79,.12); color: #ffd54f; }
+
+    /* ─── FORM GRID ──────────────────────────────────────── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:600px){ .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    .radio-group, .check-group {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px;
+    }
+    .radio-group label, .check-group label {
+      display: flex; align-items: center; gap: 6px;
+      cursor: pointer; color: var(--text);
+      text-transform: none; letter-spacing: 0; font-size: 13px;
+      margin: 0;
+    }
+    .radio-group input[type=radio],
+    .check-group input[type=checkbox] {
+      width: auto; accent-color: var(--accent);
+    }
+
+    .form-actions { display: flex; gap: 12px; margin-top: 8px; }
+
+    /* ─── QUIZ ───────────────────────────────────────────── */
+    #quiz-box { min-height: 200px; }
+    .quiz-topic-row { display: flex; gap: 12px; margin-bottom: 20px; }
+    .quiz-topic-row input { flex: 1; }
+    .question-block {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+    .question-block p {
+      font-weight: 600; margin-bottom: 12px;
+      color: var(--text); font-size: 14px;
+    }
+    .option-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 6px;
+      cursor: pointer; transition: background .15s;
+      margin-bottom: 4px;
+    }
+    .option-row:hover { background: rgba(0,229,160,.06); }
+    .option-row input[type=radio] { width: auto; accent-color: var(--accent); }
+    .option-row.correct { background: rgba(0,229,160,.12); border: 1px solid rgba(0,229,160,.3); }
+    .option-row.wrong   { background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.25); }
+
+    .quiz-result {
+      text-align: center; padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .quiz-result .score {
+      font-family: var(--font-head);
+      font-size: 3.5rem; font-weight: 800;
+      color: var(--accent);
+    }
+
+    .loader {
+      display: inline-block; width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle; margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── RESUME BUILDER ─────────────────────────────────── */
+    #resume-preview {
+      background: #fff; color: #111;
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+    #resume-preview h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 2px; }
+    #resume-preview .contact { color: #555; margin-bottom: 16px; font-size: 12px; }
+    #resume-preview h3 {
+      font-size: .72rem; text-transform: uppercase; letter-spacing: .1em;
+      color: #888; border-bottom: 1.5px solid #eee;
+      padding-bottom: 4px; margin: 18px 0 8px;
+    }
+    #resume-preview ul { padding-left: 18px; }
+    #resume-preview ul li { margin-bottom: 4px; }
+    .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .skills-grid span {
+      background: #f0f4f8; color: #333;
+      padding: 3px 10px; border-radius: 4px; font-size: 11px;
+    }
+
+    /* ─── MEDIA ──────────────────────────────────────────── */
+    .media-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media(max-width:700px){ .media-grid { grid-template-columns: 1fr; } }
+    .media-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .media-card video, .media-card audio { width: 100%; display: block; }
+    .media-info { padding: 14px 16px; }
+    .media-info h4 { font-family: var(--font-head); font-size: .95rem; margin-bottom: 4px; }
+    .media-info p { color: var(--muted); font-size: 12px; }
+
+    /* ─── TOAST ──────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 32px; right: 32px;
+      background: var(--surface); border: 1px solid var(--accent);
+      color: var(--accent); padding: 12px 20px;
+      border-radius: 8px; font-size: 13px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+      z-index: 9999;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ─── GROQ KEY NOTICE ─────────────────────────────────── */
+    .api-notice {
+      background: rgba(108,99,255,.1);
+      border: 1px solid rgba(108,99,255,.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #a99eff;
+      margin-bottom: 20px;
+    }
+    .api-notice input { margin-top: 8px; }
+
+    /* ─── PROGRESS BAR ───────────────────────────────────── */
+    .progress-bar {
+      background: var(--border); border-radius: 99px;
+      height: 6px; overflow: hidden; margin-top: 4px;
+    }
+    .progress-bar-fill {
+      height: 100%; background: var(--accent);
+      border-radius: 99px; transition: width .4s ease;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════════════════ -->
+<header>
+  <div class="logo">Edu<span>Portal</span></div>
+  <nav id="main-nav">
+    <button class="active" data-target="home">Home</button>
+    <button data-target="register">Register</button>
+    <button data-target="study">Study Hub</button>
+    <button data-target="quiz">AI Quiz</button>
+    <button data-target="resume">Resume Builder</button>
+    <button data-target="media">Media</button>
+  </nav>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN
+════════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- ── HOME ────────────────────────────────────────────── -->
+  <section id="home" class="active">
+    <div class="hero">
+      <h1>Your <em>AI-Powered</em><br>Student Hub</h1>
+      <p>Study smarter. Build faster. Quiz harder. Everything a CS & Data Science student needs — in one place.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn" onclick="navigate('register')">Get Started →</button>
+        <button class="btn ghost" onclick="navigate('quiz')">Try AI Quiz</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="num">5+</div><div class="lbl">Modules Available</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--accent2)">AI</div><div class="lbl">Groq-Powered Quizzes</div></div>
+      <div class="stat-card"><div class="num">ATS</div><div class="lbl">Resume Generation</div></div>
+      <div class="stat-card"><div class="num">∞</div><div class="lbl">Learning Resources</div></div>
+    </div>
+  </section>
+
+  <!-- ── REGISTER ─────────────────────────────────────────── -->
+  <section id="register">
+    <p class="section-title">Student <span>Registration</span></p>
+
+    <div class="card">
+      <h2>Personal Information</h2>
+      <form id="reg-form" novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="fname">First Name *</label>
+            <input type="text" id="fname" name="fname" placeholder="Ada" required />
+          </div>
+          <div class="form-group">
+            <label for="lname">Last Name *</label>
+            <input type="text" id="lname" name="lname" placeholder="Lovelace" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" placeholder="ada@uni.edu" required />
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210" />
+          </div>
+
+          <div class="form-group full">
+            <label>Gender *</label>
+            <div class="radio-group">
+              <label><input type="radio" name="gender" value="female" /> Female</label>
+              <label><input type="radio" name="gender" value="male" /> Male</label>
+              <label><input type="radio" name="gender" value="nonbinary" /> Non-binary</label>
+              <label><input type="radio" name="gender" value="prefer-not" /> Prefer not to say</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="course">Course *</label>
+            <select id="course" name="course">
+              <option value="">— Select a Course —</option>
+              <option value="cs">B.Tech Computer Science</option>
+              <option value="ds">B.Sc Data Science</option>
+              <option value="it">B.Tech Information Technology</option>
+              <option value="ai">M.Tech Artificial Intelligence</option>
+              <option value="cyber">B.Tech Cyber Security</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="year">Year of Study</label>
+            <select id="year" name="year">
+              <option value="">— Select Year —</option>
+              <option>Year 1</option>
+              <option>Year 2</option>
+              <option>Year 3</option>
+              <option>Year 4</option>
+            </select>
+          </div>
+
+          <div class="form-group full">
+            <label>Technical Skills (select all that apply)</label>
+            <div class="check-group">
+              <label><input type="checkbox" name="skills" value="python" /> Python</label>
+              <label><input type="checkbox" name="skills" value="sql" /> SQL</label>
+              <label><input type="checkbox" name="skills" value="ml" /> Machine Learning</label>
+              <label><input type="checkbox" name="skills" value="js" /> JavaScript</label>
+              <label><input type="checkbox" name="skills" value="java" /> Java</label>
+              <label><input type="checkbox" name="skills" value="cpp" /> C/C++</label>
+              <label><input type="checkbox" name="skills" value="ds-algo" /> Data Structures</label>
+              <label><input type="checkbox" name="skills" value="cyber" /> Cyber Security</label>
+            </div>
+          </div>
+
+          <div class="form-group full">
+            <label for="bio">Short Bio</label>
+            <textarea id="bio" name="bio" rows="3" placeholder="Tell us a little about yourself..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions" style="margin-top:20px;">
+          <button type="submit" class="btn">Submit Registration</button>
+          <button type="reset" class="btn ghost">Reset</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Registered students table -->
+    <div class="card" id="students-card" style="display:none;">
+      <h2>Registered Students <span class="tag" id="student-count">0</span></h2>
+      <div class="table-wrap">
+        <table cellpadding="0" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Name</th><th>Email</th><th>Course</th><th>Skills</th><th>Registered</th>
+            </tr>
+          </thead>
+          <tbody id="students-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STUDY HUB ─────────────────────────────────────────── -->
+  <section id="study">
+    <p class="section-title">Study <span>Hub</span></p>
+
+    <div class="card">
+      <h2>School of Engineering — Resource Directory <span class="tag">Advanced Table</span></h2>
+      <div class="table-wrap">
+        <table cellpadding="4" cellspacing="0">
+          <thead>
+            <tr>
+              <th rowspan="2">Dept.</th>
+              <th colspan="3">Course Materials</th>
+              <th rowspan="2">Difficulty</th>
+              <th rowspan="2">Format</th>
+            </tr>
+            <tr>
+              <th>Module</th>
+              <th>Topic</th>
+              <th>Resource Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="3"><strong>CS</strong></td>
+              <td>CS 301</td>
+              <td>Data Structures &amp; Algorithms</td>
+              <td><a href="#" onclick="toast('Resource coming soon!')">notes_dsa.pdf</a></td>
+              <td><span class="badge yellow">Intermediate</span></td>
+              <td>PDF</td>
+            </tr>
+            <tr>
+              <td>CS 402</td>
+              <td>Operating Systems</td>
+              <td><a href="#" onclick="toast('Resource coming soon!')">os_chapter1-4.pdf</a></td>
+              <td><span class="badge red">Advanced</span></td>
+              <td>PDF</td>
+            </tr>
+            <tr>
+              <td>CS 210</td>
+              <td>Computer Networks</td>
+              <td><a href="#" onclick="toast('Resource coming soon!')">networks_slides.pptx</a></td>
+              <td><span class="badge yellow">Intermediate</span></td>
+              <td>PPTX</td>
+            </tr>
+            <tr>
+              <td rowspan="2"><strong>DS</strong></td>
+              <td>DS 101</td>
+              <td>Python for Data Science</td>
+              <td><a href="#" onclick="toast('Resource coming soon!')">python_ds_intro.ipynb</a></td>
+              <td><span class="badge green">Beginner</span></td>
+              <td>Notebook</td>
+            </tr>
+            <tr>
+              <td>DS 303</td>
+              <td>Machine Learning Fundamentals</td>
+              <td><a href="#" onclick="toast('Resource coming soon!')">ml_handbook.pdf</a></td>
+              <td><span class="badge red">Advanced</span></td>
+              <td>PDF</td>
+            </tr>
+            <tr>
+              <td rowspan="2"><strong>Cyber</strong></td>
+              <td>CY 201</td>
+              <td>Network Security Basics</td>
+              <td><a href="#" onclick="toast('Resource coming soon!')">netsec_intro.pdf</a></td>
+              <td><span class="badge yellow">Intermediate</span></td>
+              <td>PDF</td>
+            </tr>
+            <tr>
+              <td>CY 305</td>
+              <td>Ethical Hacking &amp; Pen Testing</td>
+              <td><a href="#" onclick="toast('Resource coming soon!')">pentesting_labs.zip</a></td>
+              <td><span class="badge red">Advanced</span></td>
+              <td>Lab Kit</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Exam Schedule <span class="tag">Rowspan / Colspan</span></h2>
+      <div class="table-wrap">
+        <table cellpadding="4" cellspacing="0">
+          <thead>
+            <tr>
+              <th colspan="2">Semester</th>
+              <th>Subject</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Venue</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="3" style="font-weight:700;color:var(--accent);">Sem 5</td>
+              <td rowspan="2">Mid-Term</td>
+              <td>Data Structures</td>
+              <td>14 Apr 2025</td>
+              <td>09:00</td>
+              <td>Hall A</td>
+              <td><span class="badge green">Scheduled</span></td>
+            </tr>
+            <tr>
+              <td>OS Concepts</td>
+              <td>15 Apr 2025</td>
+              <td>09:00</td>
+              <td>Hall B</td>
+              <td><span class="badge green">Scheduled</span></td>
+            </tr>
+            <tr>
+              <td>End-Term</td>
+              <td>Machine Learning</td>
+              <td>10 May 2025</td>
+              <td>14:00</td>
+              <td>Hall A</td>
+              <td><span class="badge purple">Upcoming</span></td>
+            </tr>
+            <tr>
+              <td rowspan="2" style="font-weight:700;color:var(--accent2);">Sem 6</td>
+              <td>Mid-Term</td>
+              <td>Cyber Security</td>
+              <td>18 Apr 2025</td>
+              <td>11:00</td>
+              <td>Lab 3</td>
+              <td><span class="badge yellow">TBA</span></td>
+            </tr>
+            <tr>
+              <td>End-Term</td>
+              <td>Deep Learning</td>
+              <td>20 May 2025</td>
+              <td>10:00</td>
+              <td>Hall C</td>
+              <td><span class="badge yellow">TBA</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── AI QUIZ ───────────────────────────────────────────── -->
+  <section id="quiz">
+    <p class="section-title"><span>AI</span> Quiz Generator</p>
+
+    <div class="api-notice">
+      <strong>⚡ Groq API Key Required</strong> — This feature calls the Groq API directly from your browser. Your key is stored only in memory.
+      <input type="password" id="groq-key" placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxx" />
+    </div>
+
+    <div class="card">
+      <h2>Generate a Quiz <span class="tag">Groq / LLaMA 3</span></h2>
+      <div class="quiz-topic-row">
+        <input type="text" id="quiz-topic" value="Cyber Security &amp; Data Science" placeholder="Topic (e.g. Machine Learning, Networks)" />
+        <button class="btn" id="gen-btn" onclick="generateQuiz()">Generate</button>
+      </div>
+      <div id="quiz-box">
+        <p style="color:var(--muted);font-size:13px;">Enter a topic and click Generate to create a 5-question MCQ.</p>
+      </div>
+      <div id="quiz-actions" style="display:none;margin-top:16px;">
+        <button class="btn" onclick="submitQuiz()">Submit Quiz</button>
+        <button class="btn ghost" onclick="generateQuiz()">Regenerate</button>
+      </div>
+    </div>
+
+    <!-- Quiz history from localStorage -->
+    <div class="card" id="history-card" style="display:none;">
+      <h2>Quiz History</h2>
+      <div class="table-wrap">
+        <table cellpadding="0" cellspacing="0">
+          <thead>
+            <tr><th>Topic</th><th>Score</th><th>Date</th></tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RESUME BUILDER ────────────────────────────────────── -->
+  <section id="resume">
+    <p class="section-title">Resume <span>Builder</span></p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="resume-layout">
+      <div>
+        <div class="card">
+          <h2>Profile</h2>
+          <div class="form-grid">
+            <div class="form-group full">
+              <label for="r-name">Full Name</label>
+              <input id="r-name" type="text" value="Ada Lovelace" oninput="buildResume()" />
+            </div>
+            <div class="form-group">
+              <label for="r-email">Email</label>
+              <input id="r-email" type="email" value="ada@uni.edu" oninput="buildResume()" />
+            </div>
+            <div class="form-group">
+              <label for="r-phone">Phone</label>
+              <input id="r-phone" type="tel" value="+91 98765 43210" oninput="buildResume()" />
+            </div>
+            <div class="form-group full">
+              <label for="r-role">Target Role</label>
+              <select id="r-role" onchange="buildResume()">
+                <option value="Data Analyst">Data Analyst</option>
+                <option value="ML Engineer">ML Engineer</option>
+                <option value="Software Engineer">Software Engineer</option>
+                <option value="Cyber Security Analyst">Cyber Security Analyst</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label>Core Skills</label>
+              <div class="check-group">
+                <label><input type="checkbox" class="r-skill" value="Python" checked oninput="buildResume()" /> Python</label>
+                <label><input type="checkbox" class="r-skill" value="SQL" checked oninput="buildResume()" /> SQL</label>
+                <label><input type="checkbox" class="r-skill" value="Machine Learning" checked oninput="buildResume()" /> Machine Learning</label>
+                <label><input type="checkbox" class="r-skill" value="Tableau" oninput="buildResume()" /> Tableau</label>
+                <label><input type="checkbox" class="r-skill" value="Power BI" oninput="buildResume()" /> Power BI</label>
+                <label><input type="checkbox" class="r-skill" value="TensorFlow" oninput="buildResume()" /> TensorFlow</label>
+                <label><input type="checkbox" class="r-skill" value="Pandas" checked oninput="buildResume()" /> Pandas</label>
+                <label><input type="checkbox" class="r-skill" value="Scikit-learn" checked oninput="buildResume()" /> Scikit-learn</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions" style="margin-top:18px;">
+            <button class="btn sm" onclick="downloadResume()">Download PDF (Print)</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div id="resume-preview">
+          <!-- built by JS -->
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @media(max-width:800px){.resume-layout{grid-template-columns:1fr!important;}}
+    </style>
+  </section>
+
+  <!-- ── MEDIA ─────────────────────────────────────────────── -->
+  <section id="media">
+    <p class="section-title">Lesson <span>Previews</span></p>
+
+    <div class="media-grid">
+      <div class="media-card">
+        <video controls poster="" preload="metadata">
+          <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <div class="media-info">
+          <h4>Intro to Data Science</h4>
+          <p>Module 1 — Overview &amp; Python fundamentals. Duration: 12 min.</p>
+        </div>
+      </div>
+
+      <div class="media-card">
+        <video controls preload="metadata">
+          <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <div class="media-info">
+          <h4>Cyber Security Basics</h4>
+          <p>Module 1 — Threat landscape &amp; CIA triad. Duration: 9 min.</p>
+        </div>
+      </div>
+
+      <div class="media-card" style="grid-column:1/-1;">
+        <audio controls preload="metadata" style="padding:16px;background:var(--surface);">
+          <source src="https://www.w3schools.com/html/horse.ogg" type="audio/ogg" />
+          <source src="https://www.w3schools.com/html/horse.mp3" type="audio/mpeg" />
+          Your browser does not support the audio element.
+        </audio>
+        <div class="media-info">
+          <h4>Podcast: Machine Learning Trends 2025</h4>
+          <p>Audio lecture — listen during your commute. Duration: 22 min.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════ -->
+<footer>
+  <p>© 2025 EduPortal MVP — School of Engineering &nbsp;|&nbsp; Built with Vanilla HTML5, CSS3, JS &nbsp;|&nbsp; AI by Groq</p>
+</footer>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ── JS DATA SCHEMAS (mirrors Prisma models) ──────────────── */
+/*
+  User            { id, firstName, lastName, email, phone, gender, course, year, skills[], bio, createdAt }
+  CourseMaterial  { id, dept, moduleCode, topic, resourceUrl, difficulty, format }
+  QuizResult      { id, userId, topic, score, totalQ, answers[], takenAt }
+  CalendarEvent   { id, userId, title, date, time, venue, type, status }
+  ResumeProfile   { id, userId, fullName, email, phone, targetRole, skills[], summary, experience[], education[] }
+*/
+
+/* ── NAVIGATION ──────────────────────────────────────────── */
+function navigate(target) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(target)?.classList.add('active');
+  document.querySelector(`nav button[data-target="${target}"]`)?.classList.add('active');
+}
+
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => navigate(btn.dataset.target));
+});
+
+/* ── TOAST ───────────────────────────────────────────────── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── REGISTRATION ────────────────────────────────────────── */
+const regForm = document.getElementById('reg-form');
+let students = JSON.parse(localStorage.getItem('edu_students') || '[]');
+
+regForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const fd = new FormData(regForm);
+  const skills = [...document.querySelectorAll('input[name=skills]:checked')].map(i => i.value);
+
+  if (!fd.get('fname') || !fd.get('email') || !fd.get('course')) {
+    toast('⚠ Please fill required fields.'); return;
+  }
+
+  const student = {
+    id: Date.now(),
+    firstName: fd.get('fname'),
+    lastName: fd.get('lname'),
+    email: fd.get('email'),
+    phone: fd.get('phone'),
+    gender: fd.get('gender'),
+    course: fd.get('course'),
+    year: fd.get('year'),
+    skills,
+    bio: fd.get('bio'),
+    createdAt: new Date().toISOString()
+  };
+
+  students.push(student);
+  localStorage.setItem('edu_students', JSON.stringify(students));
+  renderStudents();
+  regForm.reset();
+  toast('✓ Registration successful!');
+});
+
+function renderStudents() {
+  if (!students.length) return;
+  document.getElementById('students-card').style.display = 'block';
+  document.getElementById('student-count').textContent = students.length;
+  const tbody = document.getElementById('students-tbody');
+  tbody.innerHTML = students.map(s => `
+    <tr>
+      <td>${s.firstName} ${s.lastName}</td>
+      <td>${s.email}</td>
+      <td><span class="badge purple">${s.course.toUpperCase()}</span></td>
+      <td>${s.skills.join(', ') || '—'}</td>
+      <td>${new Date(s.createdAt).toLocaleDateString()}</td>
+    </tr>`).join('');
+}
+renderStudents();
+
+/* ── AI QUIZ (GROQ) ──────────────────────────────────────── */
+let currentQuiz = null;
+
+async function generateQuiz() {
+  const apiKey = document.getElementById('groq-key').value.trim();
+  const topic  = document.getElementById('quiz-topic').value.trim() || 'Cyber Security & Data Science';
+  const box    = document.getElementById('quiz-box');
+  const actions = document.getElementById('quiz-actions');
+
+  if (!apiKey) { toast('⚠ Enter your Groq API key first.'); return; }
+
+  box.innerHTML = `<p><span class="loader"></span> Generating 5-question MCQ on <em>${topic}</em>…</p>`;
+  actions.style.display = 'none';
+
+  const SYSTEM = `You are an educational quiz generator. Always respond with ONLY valid JSON — no markdown, no preamble.`;
+  const USER   = `Generate exactly 5 multiple-choice questions about: "${topic}".
+Return a JSON object with this structure:
+{
+  "topic": "string",
+  "questions": [
+    {
+      "id": 1,
+      "question": "string",
+      "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
+      "answer": "A"
+    }
+  ]
+}
+The "answer" field must be "A", "B", "C", or "D" (matching the correct option).`;
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'allam-2-7b',
+        temperature: 0.7,
+        max_tokens: 1200,
+        messages: [
+          { role: 'system', content: SYSTEM },
+          { role: 'user',   content: USER }
+        ]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    let raw = data.choices[0].message.content.trim();
+    // strip possible markdown fences
+    raw = raw.replace(/```json|```/g, '').trim();
+    currentQuiz = JSON.parse(raw);
+    renderQuiz(currentQuiz);
+    actions.style.display = 'flex';
+
+  } catch (err) {
+    box.innerHTML = `<p style="color:var(--warn);">❌ Error: ${err.message}</p>
+      <p style="color:var(--muted);margin-top:8px;font-size:12px;">Check your API key and CORS settings. Groq API keys start with <code>gsk_</code>.</p>`;
+  }
+}
+
+function renderQuiz(quiz) {
+  const box = document.getElementById('quiz-box');
+  box.innerHTML = quiz.questions.map((q, i) => `
+    <div class="question-block" id="qblock-${i}">
+      <p>Q${i+1}. ${q.question}</p>
+      ${q.options.map((opt, j) => {
+        const letter = ['A','B','C','D'][j];
+        return `<label class="option-row" id="opt-${i}-${letter}">
+          <input type="radio" name="q${i}" value="${letter}" />
+          <span>${opt}</span>
+        </label>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function submitQuiz() {
+  if (!currentQuiz) return;
+  let score = 0;
+  currentQuiz.questions.forEach((q, i) => {
+    const selected = document.querySelector(`input[name="q${i}"]:checked`)?.value;
+    const correct  = q.answer;
+    // highlight all options
+    ['A','B','C','D'].forEach(l => {
+      const el = document.getElementById(`opt-${i}-${l}`);
+      if (!el) return;
+      el.style.pointerEvents = 'none';
+      if (l === correct) el.classList.add('correct');
+      else if (l === selected && l !== correct) el.classList.add('wrong');
+    });
+    if (selected === correct) score++;
+  });
+
+  const pct = Math.round((score / currentQuiz.questions.length) * 100);
+  document.getElementById('quiz-box').insertAdjacentHTML('afterend', `
+    <div class="quiz-result" id="quiz-result-block" style="margin-top:20px;">
+      <div class="score">${score}/${currentQuiz.questions.length}</div>
+      <p style="margin-top:8px;color:var(--muted);">${pct}% — ${pct>=80?'🏆 Excellent!':pct>=50?'👍 Good effort!':'📚 Keep studying!'}</p>
+      <div class="progress-bar" style="max-width:200px;margin:12px auto 0;">
+        <div class="progress-bar-fill" style="width:${pct}%"></div>
+      </div>
+    </div>`);
+
+  // save to history
+  const history = JSON.parse(localStorage.getItem('edu_quiz_history') || '[]');
+  history.unshift({ topic: currentQuiz.topic, score: `${score}/${currentQuiz.questions.length}`, date: new Date().toLocaleDateString() });
+  localStorage.setItem('edu_quiz_history', JSON.stringify(history.slice(0, 20)));
+  renderQuizHistory();
+  document.getElementById('quiz-actions').innerHTML = `<button class="btn ghost" onclick="generateQuiz()">Try Another</button>`;
+}
+
+function renderQuizHistory() {
+  const history = JSON.parse(localStorage.getItem('edu_quiz_history') || '[]');
+  if (!history.length) return;
+  document.getElementById('history-card').style.display = 'block';
+  document.getElementById('history-tbody').innerHTML = history.map(h => `
+    <tr>
+      <td>${h.topic}</td>
+      <td><span class="badge green">${h.score}</span></td>
+      <td>${h.date}</td>
+    </tr>`).join('');
+}
+renderQuizHistory();
+
+/* ── RESUME BUILDER ──────────────────────────────────────── */
+function getSelectedSkills() {
+  return [...document.querySelectorAll('.r-skill:checked')].map(i => i.value);
+}
+
+function buildResume() {
+  const name   = document.getElementById('r-name').value || 'Your Name';
+  const email  = document.getElementById('r-email').value || 'email@uni.edu';
+  const phone  = document.getElementById('r-phone').value || '';
+  const role   = document.getElementById('r-role').value;
+  const skills = getSelectedSkills();
+
+  const expMap = {
+    'Data Analyst': [
+      { co: 'TechCorp Analytics', role: 'Data Analyst Intern', dates: 'Jun 2024 – Aug 2024', bullets: ['Built 3 Tableau dashboards reducing reporting time by 40%','Wrote complex SQL queries on 2M+ row datasets','Cleaned and transformed data using Python (Pandas, NumPy)'] },
+    ],
+    'ML Engineer': [
+      { co: 'AI Startup', role: 'ML Engineer Intern', dates: 'May 2024 – Jul 2024', bullets: ['Trained image classification model (ResNet-50) — 93% accuracy','Deployed model via FastAPI on AWS EC2','Automated data pipeline using Apache Airflow'] },
+    ],
+    'Software Engineer': [
+      { co: 'Dev Agency', role: 'Software Engineer Intern', dates: 'Jun 2024 – Aug 2024', bullets: ['Built REST APIs in Node.js serving 10K+ daily requests','Contributed to React.js frontend — 5 features shipped','Wrote unit tests (Jest) — 85% code coverage'] },
+    ],
+    'Cyber Security Analyst': [
+      { co: 'SecureTech', role: 'Security Intern', dates: 'Jul 2024 – Sep 2024', bullets: ['Performed vulnerability assessments using Nmap & Metasploit','Documented 12 CVEs in internal audit','Configured firewall rules on pfSense — blocked 200+ threat IPs'] },
+    ],
+  };
+
+  const exp = expMap[role] || expMap['Data Analyst'];
+
+  document.getElementById('resume-preview').innerHTML = `
+    <h1>${name}</h1>
+    <div class="contact">${email} &nbsp;|&nbsp; ${phone} &nbsp;|&nbsp; linkedin.com/in/${name.replace(/\s+/g,'-').toLowerCase()} &nbsp;|&nbsp; github.com/${name.split(' ')[0].toLowerCase()}</div>
+
+    <h3>Summary</h3>
+    <p>Motivated ${role} with strong foundations in data analysis, programming, and problem-solving. Seeking to apply academic knowledge in a high-impact role.</p>
+
+    <h3>Experience</h3>
+    ${exp.map(e => `
+      <p><strong>${e.role}</strong> — ${e.co} <span style="float:right;color:#888;">${e.dates}</span></p>
+      <ul>${e.bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+    `).join('')}
+
+    <h3>Education</h3>
+    <p><strong>B.Tech Computer Science</strong> — School of Engineering <span style="float:right;color:#888;">2021 – 2025</span></p>
+    <p style="color:#555;">CGPA: 8.4 / 10 &nbsp;|&nbsp; Relevant: DSA, DBMS, ML, OS</p>
+
+    <h3>Technical Skills</h3>
+    <div class="skills-grid">${skills.map(s => `<span>${s}</span>`).join('') || '<span>—</span>'}</div>
+
+    <h3>Projects</h3>
+    <p><strong>Customer Churn Prediction</strong> — Built XGBoost model (AUC 0.91) on telecom dataset. Deployed on Streamlit.</p>
+    <p><strong>SQL Sales Dashboard</strong> — PostgreSQL + Metabase dashboard for retail KPIs (10+ metrics).</p>
+
+    <h3>Certifications</h3>
+    <ul>
+      <li>Google Data Analytics Professional Certificate</li>
+      <li>AWS Cloud Practitioner Essentials</li>
+    </ul>
+  `;
+}
+
+function downloadResume() {
+  window.print();
+  toast('Opening print dialog — Save as PDF for best results.');
+}
+
+// init resume on load
+buildResume();
+</script>
+</body>
+</html>
