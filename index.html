@@ -1891,7 +1891,7 @@
 
 <span class="kw">AI INTEGRATION</span>
   ├── Provider  : Groq Cloud                 <span class="cm"># Ultra-fast inference (LPU hardware)</span>
-  ├── Model     : llama3-8b-8192             <span class="cm"># Best speed/quality for MCQ tasks</span>
+  ├── Model     : allam-2-7b             <span class="cm"># Best speed/quality for MCQ tasks</span>
   └── Fallback  : mixtral-8x7b-32768        <span class="cm"># Longer context if needed</span>
 
 <span class="kw">DEPLOYMENT</span>
@@ -2126,7 +2126,7 @@ The "answer" field is the 0-based index of the correct option.
     `.trim();
 
     <span class="kw">const</span> completion = <span class="kw">await</span> groq.chat.completions.create({
-      model:       <span class="st">'llama3-8b-8192'</span>,
+      model:       <span class="st">'allam-2-7b'</span>,
       temperature: 0.4,
       max_tokens:  1200,
       messages: [
@@ -2181,7 +2181,7 @@ The "answer" field is the 0-based index of the correct option.
 ═══════════════════════════════════════════════════════════════════════════ -->
 <script>
 /* ── GLOBALS ─────────────────────────────────────────────────────────── */
-const GROQ_MODEL   = 'llama3-8b-8192';
+const GROQ_MODEL   = 'allam-2-7b';
 let   currentRole  = 'Student';
 let   quizData     = [];
 let   quizAnswers  = {};
